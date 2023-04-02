@@ -1,3 +1,4 @@
+"use strict";
 /* DEPENDENCIES */
 const path = require("path");
 const express = require("express");
@@ -9,10 +10,19 @@ if (ENV === "production") {
     require("dotenv").config({ path: path.join(__dirname, ".env-dev") });
 }
 
+const userRouter = require("./user.route");
+
 /* APP INITIALIZATIONS */
 const app = express();
 const port = process.env.PORT || 3000;
 const ipaddress = process.env.IP || "127.0.0.1";
+
+app.use(express.json());
+app.use(express.urlencoded({
+    extended: true
+}));
+
+app.use("/api/users", userRouter, logger);
 
 app.get("/", onRootHandler, logger);
 
@@ -23,10 +33,11 @@ const server = app.listen(port, ipaddress, () => {
 /* FUNCTIONS */
 function onRootHandler(req, res, next) {
     res.status(200).send("Hello world");
-    next();
+    return next();
 }
 
 function logger(req, res, next) {
-    console.log(`[ ${new Date().toLocaleString()} ] ${req.method} ${res.statusCode} ${req.url}`);
-    next();
+    console.log("logger called");
+    console.log(`[ ${new Date().toLocaleString()} ] ${req.method} ${req.protocol}://${req.hostname}${req.originalUrl}`);
+    return next();
 }
